@@ -1,90 +1,141 @@
 import React, { useState, useEffect, useRef } from "react";
-import styled, { createGlobalStyle } from "styled-components";
-import gsap, { TweenLite } from "gsap";
+import styled from "styled-components";
+import gsap from "gsap";
 
-const GlobalStyle = createGlobalStyle`
-@import url('https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap');
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: sans-serif;
-  }
-`;
-const Wrapper = styled.div`
+import { ActiveIndex, Item as ItemProp } from "./types";
+import { itemsInitial } from "./assets/dataset";
+
+import useMediaQuery from "./hooks/useMediaQuery";
+
+import DateSummary from "./components/summaries/DateSummary";
+import { calculateStepsToTarget } from "./utils/utils";
+import ItemsSwiper from "./components/swipers/ItemsSwiper";
+import { GlobalStyle } from "./styles/GlobalStyle";
+
+
+const Wrapper = styled.div<{
+  $isMobile: boolean;
+}>`
   position: relative;
-  /* margin-top: 50px;*/
-  margin: 0 auto; 
-  height: 100svh;
+  margin: 0;
+  margin-left: calc(((100vw - 1440px) / 3) * 2);
+  margin-right: calc(((100vw - 1440px) / 3));
+  min-height: 100svh;
   max-width: 1440px;
-  border: 1px solid rgba(66, 86, 122, 0.2);
-  &::after {
-    content:'';
-    position:absolute;
-    left:0;
-    top:calc(20svh + 265px);
-    width:100%;
-    height:1px;
-    background:#42567A;
-    opacity:.2;
-  }
+  outline: 1px solid rgba(66, 86, 122, 0.2);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   &::before {
-    content:'';
-    position:absolute;
-    left:50%;
-    top:0;
-    width:1px;
-    height:100%;
-    background:#42567A;;
-    opacity:.2;
+    content: "";
+    z-index: -11;
+    position: absolute;
+    display: ${(props) => (!props.$isMobile ? "block" : "none")};
+    left: 50%;
+    top: 0;
+    width: 1px;
+    height: 100%;
+    background: var(--brand-color-black-blue);
+    opacity: 0.2;
+  }
+
+  @media (max-width: 1440px) {
+    margin: 0;
+  }
+  @media (max-width: 1200px) {
+    gap: 0;
+  }
+  @media (max-width: 1024px) {
+    height: calc(100svh - 40px);
+    padding: 0 20px;
   }
 `;
 
-const Container = styled.div`
-
-  margin:0 auto;
+const InnerContainer = styled.div`
+  z-index: 1000;
+  margin: 0 auto;
   height: 530px;
   width: 530px;
   border-radius: 50%;
   border: 1px solid rgba(0, 0, 0, 0.2);
-  /*overflow: hidden;  Скрытие части, которую мы будем вращать */
+  transition: all 0.2s easy;
+  @media (max-width: 1200px) {
+    transform: scale(0.8);
+  }
+  @media (max-width: 1024px) {
+    display: none;
+  }
 `;
 
-const InnerContainer = styled.div`
+const Container = styled.div<{
+  $isMobile: boolean;
+}>`
   position: relative;
-  margin-top: 15svh;
-  padding-top: 5svh;
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: calc(530px / 2);
+    width: 100%;
+    height: 1px;
+    background: var(--brand-color-black-blue);
+    display: ${(props) => (!props.$isMobile ? "block" : "none")};
+    opacity: 0.2;
+    z-index: -11;
+  }
+  @media (max-width: 1200px) {
+    flex-grow: 1;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+  }
 `;
 const MainHeader = styled.h1`
-    position: absolute;
-    padding-left:78px;
-    border-left:5px solid red;
-    border-image: linear-gradient(#3877EE, #EF5DA8) 30;
-  /* border-width: 4px;
-  border-style: solid; */
-    top:0;
-    left:-2px;
-    color: #42567A;
-    font-family: 'PT Sans', sans-serif;
-    font-size: 56px;
-    font-style: normal;
-    font-weight: 700;
-    line-height: 120%;
+  position: absolute;
+  padding-left: 78px;
+  border-left: 5px solid;
+  border-image: linear-gradient(var(--brand-color-blue), var(--brand-color-fuchsia)) 30;
+  top: 0;
+  left: -2px;
+  color: var(--brand-color-black-blue);
+  font-family: "PT Sans", sans-serif;
+  font-size: 56px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 120%;
+  @media (max-width: 1200px) {
+    font-size: 48px;
+  }
+  @media (max-width: 1024px) {
+    font-size: 32px;
+    border: none;
+    padding-left: 0;
+    margin-top:60px;
+  }
+  @media (max-width: 768px) {
+    padding-top: 0px;
+    position: relative;
+    top: 0;
+    left: 0;
+    font-size: 20px;
+  } /**/
 `;
 const Item = styled.div<{
   width: number;
   angle: number;
-  posY: number;
-  posX: number;
+  posy: number;
+  posx: number;
 }>`
   position: absolute;
   height: 6px;
+  z-index: 1000;
   width: 6px;
-  top: ${(props) => props.posX}px;
-  left: ${(props) => props.posY}px;
+  top: ${(props) => props.posx}px;
+  left: ${(props) => props.posy}px;
   border-radius: 50%;
-  background: #42567a;
+  background: var(--brand-color-black-blue);
   line-height: 6px;
-  color: #42567a;
+  color: var(--brand-color-black-blue);
   text-align: center;
   transform: translateX(-50%) translateY(-50%)
     rotate(${(props) => props.angle}deg);
@@ -97,14 +148,22 @@ const Item = styled.div<{
   & > span.label {
     position: absolute;
     left: calc(100% + 20px);
+    color: var(--brand-color-black-blue);
+    font-family: 'PT Sans';
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 150%;
   }
   &.active {
-    background: white;
-    border: 1px solid #42567a;
+    background: var(--brand-color-background);
+    opacity: 1;
+    border: 1px solid var(--brand-color-black-blue);
     width: 56px;
     height: 56px;
     & > span {
       display: block;
+      opacity: 1;
     }
   }
   & > span {
@@ -112,8 +171,9 @@ const Item = styled.div<{
     position: relative;
   }
   &:hover {
-    background: white;
-    border: 1px solid #42567a;
+    background: var(--brand-color-white);
+    opacity: 1;
+    border: 1px solid var(--brand-color-black-blue);
     width: 56px;
     height: 56px;
     & > span:first-child {
@@ -122,91 +182,30 @@ const Item = styled.div<{
   }
 `;
 
-const StartButton = styled.div`
-  display: inline-block;
-  background: #cccc;
-  padding: 10px 25px;
-  border: 1px solid #000;
-  cursor: pointer;
-`;
-interface Item {
-  width: number;
-  angle: number | null;
-  posX: number | null;
-  posY: number | null;
-  label: string;
-}
-
 const App: React.FC = () => {
   const container = useRef<HTMLDivElement>(null);
-  const [items, setItems] = useState<Item[]>([
-    {
-      label: "заголовок1",
-      width: 30,
-      angle: -1.5707963267948966,
-      posX: null,
-      posY: null,
-    },
-    {
-      label: "заголовок2",
-      width: 30,
-      angle: -1.158855956842314,
-      posX: null,
-      posY: null,
-    },
-    {
-      label: "заголовок3",
-      width: 30,
-      angle: -0.334975216937149,
-      posX: 194.4418457249614,
-      posY: 67.12542356071204,
-    },
-    {
-      label: "заголовок4",
-      width: 30,
-      angle: 0.488905522968016,
-      posX: 188.28474192681682,
-      posY: 146.96599134390067,
-    },
-    {
-      label: "заголовок5",
-      width: 30,
-      angle: 1.312786262873181,
-      posX: 125.51569898786613,
-      posY: 196.68996382852055,
-    },
-    {
-      label: "заголовок6",
-      width: 30,
-      angle: 2.136667002778346,
-      posX: 46.38490240145492,
-      posY: 184.41221066586567,
-    },
-  ]);
-  const [activeIndex, setActiveIndex] = useState<{
-    index: number;
-    prev: number | null;
-    angle: number | null;
-  }>({ index: 0, prev: null, angle: null });
 
-  const radius = 530/2;
-  const step = (-2 * Math.PI) / items.length;
-  let stepDeg = -360 / items.length;
-  const startingAngle = (5 * Math.PI) / 6;
+  const isMobile = useMediaQuery("(max-width: 1024px)");
+
+  const [items, setItems] = useState<ItemProp[]>(itemsInitial);
+  const [activeIndex, setActiveIndex] = useState<ActiveIndex>({
+    index: 0,
+    prev: null,
+    angle: null,
+  });
+
+  const radius = 530 / 2;
   const length = items.length;
+  const step = (-2 * Math.PI) / length;
+  const startingAngle = (5 * Math.PI) / 6;
 
-  function calculateStepsToTarget(prevIndex: number, newIndex: number) {
-    if (newIndex === prevIndex) return 0;
-    let positiveStep = 0;
-    if (newIndex < prevIndex) {
-      positiveStep = prevIndex - newIndex;
-    } else {
-      positiveStep = length - (newIndex + 1) + (prevIndex + 1);
-    }
-    if (positiveStep > length - positiveStep) return -(length - positiveStep);
+  let stepDeg = -360 / length;
 
-    return positiveStep;
-  }
+  const oneRotationStep = -stepDeg;
+
+  const tl = useRef<gsap.core.Timeline>(
+    gsap.timeline({ autoRemoveChildren: false })
+  );
 
   const getPositions = () => {
     let currentAngle = startingAngle;
@@ -227,7 +226,11 @@ const App: React.FC = () => {
     setActiveIndex((p) => {
       const new_angle =
         oneRotationStep *
-        calculateStepsToTarget(activeIndex?.prev ?? 0, activeIndex.index);
+        calculateStepsToTarget(
+          activeIndex?.prev ?? 0,
+          activeIndex.index,
+          length
+        );
       return { index, prev: p.index, angle: new_angle };
     });
   };
@@ -238,33 +241,65 @@ const App: React.FC = () => {
     }
   }, [items]);
 
-  console.log("activeIndex", activeIndex);
-  const oneRotationStep = -stepDeg;
-
-  const tl = useRef<gsap.core.Timeline>(
-    gsap.timeline({ autoRemoveChildren: false })
-  );
-
   useEffect(() => {
-    //  console.log("Анимируем вращение контейнера");
     if (container.current) {
-      const steps = calculateStepsToTarget(0, activeIndex.index);
-      // console.log("нужно сделать ", steps, " шагов по ",stepDeg," итого:", stepDeg*steps);
+      const steps = calculateStepsToTarget(0, activeIndex.index, length);
+      // const stepsForLastActive = calculateStepsToTarget(activeIndex.prev ?? 0, activeIndex.index, length);
+      // console.log(
+      //   "нужно сделать ",
+      //   steps,
+      //   " шагов по ",
+      //   stepDeg,
+      //   " итого:",
+      //   oneRotationStep * steps
+      // );
 
       const activeItem = container.current.querySelector(".active");
-      tl.current = gsap.timeline({ duration: 0.2 });
+      tl.current = gsap.timeline({
+        duration: 0,
+      });
       tl.current
         .to(container.current, {
-          rotation: oneRotationStep * steps,
+          rotation: `${oneRotationStep * steps}_short`,
           overwrite: true,
           ease: "power2.inOut",
+          delay: 0,
+          duration: 0.6 * Math.abs(step),
         })
         .to(
           container.current.children,
           {
-            rotation: -oneRotationStep * steps,
+            rotation: `${(-oneRotationStep *  steps)}`,
+            overwrite: true,
+            duration: 0.6 * Math.abs(step),
+            delay: -0.6 * Math.abs(step),
+            ease: "power2.inOut",
+          },
+          "<"
+        )
+        .from(
+          "#counter-min",
+          {
+            textContent: Math.min(
+              ...items[activeIndex?.prev || 0].events.map((e) => e.year)
+            ),
+            snap: { textContent: 1 },
+            duration: 1.2,
+            stagger: 10,
           },
           "-=1"
+        )
+        .from(
+          "#counter-max",
+          {
+            textContent: Math.max(
+              ...items[activeIndex?.prev || 0].events.map((e) => e.year)
+            ),
+            snap: { textContent: 1 },
+            duration: 1.2,
+            stagger: 10,
+          },
+          "<"
         )
         .fromTo(
           activeItem?.children?.[1] || ".active>span.label",
@@ -276,44 +311,48 @@ const App: React.FC = () => {
           }
         );
     }
-  }, [activeIndex, items]);
+  }, [activeIndex.index, items]);
+
+  function handleSetActive(newIndex: number) {
+    handleItemClick(newIndex);
+  }
 
   return (
-    <Wrapper>
+    <Wrapper $isMobile={isMobile}>
       <GlobalStyle />
-      <InnerContainer>
-<MainHeader>Исторические <br/>даты</MainHeader>
-      <Container ref={container} className="container">
-        {items.map(({ width, posX, posY, angle, label }, index) => {
-          console.log(posX, posY, index);
-          return (
-            <Item
-              key={index}
-              className={index === activeIndex.index ? "active" : ""}
-              width={width}
-              angle={angle || 0}
-              posX={posX || 0}
-              posY={posY || 0}
-              onClick={() => handleItemClick(index)}
-            >
-              <span> {index + 1}</span>
-              <span className="label">{label}</span>
-            </Item>
-          );
-        })}
+      <Container $isMobile={isMobile}>
+        <MainHeader>
+          Исторические <br />даты
+        </MainHeader>
+        {!isMobile && (
+          <InnerContainer ref={container} className="container">
+            {items.map(({ width, posX, posY, angle, label }, index) => {
+              return (
+                <Item
+                  key={label + String(index)}
+                  className={index === activeIndex.index ? "active" : ""}
+                  width={width}
+                  angle={angle ?? 0}
+                  posx={posX ?? 0}
+                  posy={posY ?? 0}
+                  onClick={() => handleItemClick(index)}
+                >
+                  <span> {index + 1}</span>
+                  <span className="label">{label}</span>
+                </Item>
+              );
+            })}
+          </InnerContainer>
+        )}
+
+        <DateSummary events={items[activeIndex.index].events} />
       </Container>
-      <StartButton
-        onClick={() =>
-          setItems(
-            items
-              .slice(0, items.length - 1)
-              .map((it) => ({ ...it, posY: null }))
-          )
-        }
-      >
-        Start
-      </StartButton>
-      </InnerContainer>
+      <ItemsSwiper
+        activeIndex={activeIndex.index}
+        items={items}
+        handleActiveChange={handleSetActive}
+        onResize={getPositions}
+      />
     </Wrapper>
   );
 };
