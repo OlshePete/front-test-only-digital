@@ -1,14 +1,17 @@
 import React, { FC, useEffect, useRef } from "react";
 import styled from "styled-components";
+
 import { Swiper, SwiperRef, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
-import NavIcon from "../navigation/NavIcon";
-
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+
 import useMediaQuery from "../../hooks/useMediaQuery";
 import { EventSwiperProps } from "../../types";
+
+import NavIcon from "../icons/NavIcon";
+
 
 const CustomSwiper = styled(Swiper)`
   width: 100%;
@@ -101,6 +104,7 @@ const EventSwiper: FC<EventSwiperProps> = ({ activeIndex, events }) => {
       swiperInstance.slideTo(0);
     }
   }, [activeIndex]);
+
   const pagination = {
     clickable: true,
   };
@@ -153,11 +157,9 @@ const EventSwiper: FC<EventSwiperProps> = ({ activeIndex, events }) => {
               </SwiperSlideWrapper>
             );
           })}
-
         </CustomSwiper>
       )}
       <NavEL className="nav-element">
-        
           <NavIcon
             size={40}
             opposite={true}

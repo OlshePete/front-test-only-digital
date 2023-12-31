@@ -8,6 +8,8 @@ export const GlobalStyle = createGlobalStyle`
   --brand-color-white:#FFFFFF;
   --brand-color-fuchsia:#EF5DA8;
   --brand-color-iris:#5D5FEF;
+  --brand-color-border-active-circle-item:#303E58;
+
   --brand-color-icon-shadow:rgba(56, 119, 238, 0.10);
 
   --brand-font-primary:"PT Sans", sans-serif;
@@ -24,4 +26,9 @@ body {
     background-color:var(--brand-color-background);
     min-height:100vh;
   }
+#next-btn {
+  &>path {
+    transform:rotate(180deg)
+  }
+}
 `;

@@ -18,6 +18,10 @@ module.exports = {
         use: 'ts-loader',
       },
       {
+        test: /\.svg$/,
+        use: ['@svgr/webpack'],
+      },
+      {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
         use: 'babel-loader',
@@ -25,7 +29,7 @@ module.exports = {
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
-      },
+      }
     ],
   },
   plugins: [

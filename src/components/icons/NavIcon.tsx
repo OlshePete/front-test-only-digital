@@ -16,9 +16,7 @@ const Svg = styled(Icon)<SvgProps>`
     stroke: ${(props) => props.$circleColor ?? "var(--brand-color-black-blue)"};
     transition: transform 0.3s ease-in-out;
   }
-
   path {
-    transform: ${(props) => (props.$opposite ? "rotate(180deg)" : "none")};
     stroke: ${(props) => props.$pathColor ?? "var(--brand-color-black-blue)"};
     transform-origin: center center;
     transition: transform 0.3s ease-in-out;
@@ -26,8 +24,6 @@ const Svg = styled(Icon)<SvgProps>`
 `;
 
 const NavIcon: React.FC<NavIconProps> = ({
-  size = 50,
-  circleColor = "var(--brand-color-black-blue)",
   pathColor = "var(--brand-color-black-blue)",
   opposite = true,
   fill="none",
@@ -39,14 +35,11 @@ const NavIcon: React.FC<NavIconProps> = ({
       viewBox="0 0 50 50"
       width="50"
       height="50"
-      $pathColor={pathColor}
       fill={fill}
-      $circleColor={circleColor}
-      $opposite={opposite}
       onClick={onClick}
-      size={size}
+      id={opposite?"next-btn":"prev-btn"}
       className={className ?? ""}
-    >
+>
       <circle
         cx="25"
         cy="25"

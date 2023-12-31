@@ -1,3 +1,11 @@
+import { FC, Ref } from "react";
+import gsap from "gsap"
+
+export interface IContext {
+  active: number;
+  getActive?: () => number;
+  moveTo?: (id: number) => void;
+}
 export interface Event {
   year: number;
   content: string;
@@ -9,6 +17,14 @@ export interface Item {
   posY: number | null;
   label: string;
   events: Event[];
+}
+export interface CircularListProps {
+  dataset: Item[]
+}
+export interface CircularItemProps {
+  index: number;
+  handleItemClick: (id: number,) => void;
+  active: boolean;
 }
 export interface ActiveIndex {
   index: number;
@@ -25,7 +41,10 @@ export interface NavIconProps {
   className?: string;
   fill?: string;
 }
-export interface SvgProps {
+export interface FCwithRefProps {
+  ref: Ref<HTMLDivElement>
+}
+export interface SvgProps extends FCwithRefProps {
   size?: number;
   $circleColor?: string;
   $pathColor?: string;
@@ -34,7 +53,6 @@ export interface SvgProps {
   className?: string;
   fill?: string;
 }
-
 export interface ItemsNavigationProps {
   itemsLength: number;
   activeIndex: number;
@@ -48,7 +66,8 @@ export interface ItemsSwiperProps {
   activeIndex: number;
 }
 export interface DateSummaryProps {
-  events: Event[];
+  dataset: Item[];
+  activeIndex: number;
 }
 export interface TimelineProps {
   items: Item[];
@@ -57,4 +76,16 @@ export interface TimelineProps {
 export interface EventSwiperProps {
   events: Event[];
   activeIndex: number;
+}
+export type YearSpanProp = {
+  timeline: gsap.core.Timeline | null | undefined;
+  year: number;
+  secondary?: boolean;
+};
+export interface CircleSliderProps {
+  items: Item[];
+  activeIndex: number;
+  prevIndex: number;
+  timeline: gsap.core.Timeline | null | undefined;
+  handleItemClick: (index: number) => void
 }

@@ -53,7 +53,7 @@ export const itemsInitial: Item[] = [
     posY: null,
     events: [
       {
-        year: 2001,
+        year: 1901,
         content:
           "13 сентября — частное солнечное затмение, видимое в Южной Африке и части Антарктиды",
       },
@@ -82,7 +82,7 @@ export const itemsInitial: Item[] = [
     posY: 67.12542356071204,
     events: [
       {
-        year: 2002,
+        year: 1991,
         content:
           "Телескоп «Хаббл» обнаружил самую удалённую из всех обнаруженных галактик, получившую обозначение GN-z11",
       },
@@ -111,7 +111,7 @@ export const itemsInitial: Item[] = [
     posY: 146.96599134390067,
     events: [
       {
-        year: 2004,
+        year: 1998,
         content:
           "Компания Tesla официально представила первый в мире электрический грузовик Tesla Semi",
       },

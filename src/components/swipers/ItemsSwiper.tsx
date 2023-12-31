@@ -3,14 +3,14 @@ import styled from "styled-components";
 
 import { Navigation, Pagination, EffectFade } from "swiper/modules";
 import { Swiper, SwiperClass, SwiperRef, SwiperSlide } from "swiper/react";
-import NavIcon from "../navigation/NavIcon";
-import { ItemsSwiperProps } from "../../types";
-
+import { PaginationOptions } from "swiper/types/modules/pagination";
 import "swiper/css";
 import "swiper/css/effect-fade";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { PaginationOptions } from "swiper/types/modules/pagination";
+
+import { ItemsSwiperProps } from "../../types";
+import NavIcon from "../icons/NavIcon";
 import { useDebounce } from "../../hooks/useDebounce";
 import EventSwiper from "./EventSwiper";
 
@@ -59,16 +59,15 @@ const SwiperSlideWrapper = styled(SwiperSlide)`
 const NavBlock = styled("div")`
   z-index: 1200;
   position: absolute;
-  top: calc(100% - 295px - 56px);
+  top: calc(530px);
   left: 80px;
   display: flex;
   flex-direction: column;
   gap: 20px;
-    & > #items-nav {
-      display: flex;
-      gap: 20px;
-
-    }
+  & > #items-nav {
+    display: flex;
+    gap: 20px;
+  }
   @media (min-width: 1024px) {
   }
   @media (max-width: 1024px) {
@@ -78,7 +77,7 @@ const NavBlock = styled("div")`
     & > #items-nav {
       display: flex;
       gap: 10px;
-    } 
+    }
   }
 `;
 const CustomPagination = styled("div")`
@@ -90,7 +89,8 @@ const CustomPagination = styled("div")`
   font-weight: 400;
   line-height: normal;
 `;
-const ItemsSwiper: FC<ItemsSwiperProps> = ({ items, handleActiveChange, activeIndex, onResize }) => {
+const ItemsSwiper: FC<ItemsSwiperProps> = (props) => {
+  const { items, handleActiveChange, activeIndex, onResize } = props;
   const swiperRef = useRef<SwiperRef | null>(null);
 
   const handleResize = ({ realIndex, ...swiper }: SwiperClass) => {
@@ -157,7 +157,7 @@ const ItemsSwiper: FC<ItemsSwiperProps> = ({ items, handleActiveChange, activeIn
           crossFade: true,
         }}
         onSlideChange={({ realIndex, ...swiper }: SwiperClass) => {
-          handleActiveChange(realIndex);
+          if (realIndex !== activeIndex) handleActiveChange(realIndex);
         }}
       >
         {items.map((item, index) => {

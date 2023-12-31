@@ -1,6 +1,13 @@
-import React, { FC } from "react";
+import React, {
+  FC,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import styled from "styled-components";
-import { DateSummaryProps } from "../../types";
+import { DateSummaryProps, YearSpanProp } from "../../types";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 
 const Container = styled.div`
   flex-grow: 1;
@@ -8,7 +15,7 @@ const Container = styled.div`
   z-index: -10;
   position: absolute;
   transform-origin: center center;
-  top: calc(530px / 2);
+  top: calc(530px / 2 + 40px);
   transform: translate(0, -50%);
   width: 100%;
   display: flex;
@@ -56,15 +63,61 @@ const DateSummaryYearSpan = styled.span<{
     letter-spacing: -1.12px;
   }
 `;
-const DateSummary: FC<DateSummaryProps> = ({ events }) => {
+
+function YearSpan({ timeline, year, secondary = false }: YearSpanProp) {
+  const el = useRef<HTMLDivElement>(null);
+  const [value, setValue] = useState(year);
+
+  useGSAP(() => {
+    console.log("active year", secondary, "c^", value, " по ", year);
+
+    timeline &&
+      timeline.fromTo(
+        el.current,
+        {
+          textContent: value,
+          snap: { textContent: 1 },
+          stagger: 10,
+        },
+        {
+          textContent: year,
+          snap: { textContent: 1 },
+          stagger: 1,
+          onCompleteParams: [setValue],
+          onComplete: (setValue) => setValue(year),
+        },
+        0
+      );
+  }, [timeline, year]);
+
+  return (
+    <DateSummaryYearSpan $secondary={secondary} className="circle" ref={el}/>
+  );
+}
+
+const DateSummary: FC<DateSummaryProps> = ({ dataset, activeIndex }) => {
+  const [yearList, setYearList] = useState<number[]>(
+    dataset[activeIndex].events.map((e) => +e.year)
+  );
+
+  const timeline = useRef<gsap.core.Timeline>(
+    gsap.timeline({ defaults: { duration: 2 } })
+  );
+
+  useGSAP(() => {timeline.current = gsap.timeline({ defaults: { duration: 2 } })},{dependencies: [activeIndex]});
+ 
+  useEffect(() => {
+    setYearList(dataset[activeIndex].events.map((e) => +e.year));
+  }, [dataset, activeIndex]);
+
   return (
     <Container>
-      <DateSummaryYearSpan id="counter-min" as="span" $secondary={false}>
-        {Math.min(...events.map((e) => +e.year))}
-      </DateSummaryYearSpan>
-      <DateSummaryYearSpan id="counter-max" as="span" $secondary={true}>
-        {Math.max(...events.map((e) => +e.year))}
-      </DateSummaryYearSpan>
+      <YearSpan timeline={timeline.current} year={Math.min(...yearList)} />
+      <YearSpan
+        timeline={timeline.current}
+        year={Math.max(...yearList)}
+        secondary={true}
+      />
     </Container>
   );
 };
