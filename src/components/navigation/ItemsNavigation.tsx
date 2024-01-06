@@ -12,8 +12,15 @@ const Container = styled.div`
   flex-wrap: wrap;
   gap: 20px;
   @media (max-width: 1024px) {
-    order: 10;
-    top: 100%;
+    padding-left: 0px;
+  }
+  @media (max-width: 799px) {
+    position:absolute;
+    top:calc(100% - 70px);
+    width: 60px;
+    z-index:3;
+    row-gap:10px;
+    column-gap:8px;
     padding-left: 0px;
   }
 `;
@@ -40,12 +47,14 @@ const ItemsNavigation: FC<ItemsNavigationProps> = ({
       </ActiveItemSummary>
       <NavIcon
         opposite={false}
+        id="items"
         onClick={() =>
           handleSetActive(activeIndex === 0 ? itemsLength - 1 : activeIndex - 1)
         }
       />
       <NavIcon
         opposite={true}
+        id="items"
         onClick={() =>
           handleSetActive(activeIndex === itemsLength - 1 ? 0 : activeIndex + 1)
         }

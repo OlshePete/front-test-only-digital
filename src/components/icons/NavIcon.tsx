@@ -21,11 +21,16 @@ const Svg = styled(Icon)<SvgProps>`
     transform-origin: center center;
     transition: transform 0.3s ease-in-out;
   }
+  @media (max-width: 1024px) {
+    width:25px;
+    height:25px;
+  }
 `;
 
 const NavIcon: React.FC<NavIconProps> = ({
   pathColor = "var(--brand-color-black-blue)",
   opposite = true,
+  id="",
   fill="none",
   onClick,
   className,
@@ -37,7 +42,7 @@ const NavIcon: React.FC<NavIconProps> = ({
       height="50"
       fill={fill}
       onClick={onClick}
-      id={opposite?"next-btn":"prev-btn"}
+      id={(id?id+"-":"")+(opposite?"next-btn":"prev-btn")}
       className={className ?? ""}
 >
       <circle

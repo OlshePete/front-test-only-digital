@@ -1,7 +1,7 @@
-import React, { FC, useEffect, useRef } from "react";
+import React, { FC, useRef } from "react";
 import styled from "styled-components";
 
-import { Swiper, SwiperRef, SwiperSlide } from "swiper/react";
+import { Swiper, SwiperClass, SwiperRef, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -12,42 +12,63 @@ import { EventSwiperProps } from "../../types";
 
 import NavIcon from "../icons/NavIcon";
 
-
 const CustomSwiper = styled(Swiper)`
   width: 100%;
-  & > * > .swiper-pagination-bullet-active {
-    background: var(--brand-color-black-blue);
+  height: auto;
+  & > .swiper-wrapper {
+    z-index: 2;
   }
-  .swiper-button-disabled {
-    opacity: 0;
-  }
-  @media (min-width: 1024px) {
+  @media (min-width: 799px) {
+    .swiper-pagination {
+      display: none;
+    }
   }
   @media (max-width: 1024px) {
     padding: 0;
-    padding-bottom: 60px;
     .swiper-button {
       display: none;
     }
     .swiper-slide {
-      width:60%
+      width: 60%;
     }
+  }
+  @media (max-width: 799px) {
+    width: 100%;
+    padding: 0;
   }
 `;
 const Container = styled.div<{
   $isMobile: boolean;
 }>`
-  margin: ${(props) => (props.$isMobile ? "0" : "56px 0 0 0")};
+  margin: ${(props) => (props.$isMobile ? " 0" : "56px 0 0 0")};
   position: relative;
   height: auto;
   display: flex;
   align-items: center;
   & > .nav-element {
-    padding:0 20px;
+    padding: 0 20px;
+  }
+  .swiper-button.swiper-button-disabled {
+    opacity: 0;
+  }
+  @media (max-width: 1440px) and (min-width: 799px) and (max-height: 790px) {
+    margin: 0;
   }
   @media (max-width: 1024px) {
+    height: 100%;
+    margin: 0;
+  }
+  @media (max-width: 799px) {
+    padding-top: 20px;
     & > .nav-element {
-      display:none;
+      display: none;
+    }
+    & > .swiper {
+      height: 100%;
+    }
+    margin: 0;
+    & > .swiper-wrapper {
+      min-height: 100%;
     }
   }
 `;
@@ -56,12 +77,12 @@ const NavEL = styled.div`
     width: 40px;
     height: 40px;
   }
-  
-`
+`;
 
 const SwiperSlideWrapper = styled(SwiperSlide)`
   height: 135px;
   width: 400px;
+  padding-right: 25px;
   & > span {
     color: var(--brand-color-blue);
     font-family: var(--brand-font-secondary);
@@ -73,17 +94,15 @@ const SwiperSlideWrapper = styled(SwiperSlide)`
   }
   & > p {
     color: var(--brand-color-black-blue);
-    font-family: PT Sans;
+    font-family: 'PT Sans';
     font-size: 20px;
     font-style: normal;
     font-weight: 400;
     line-height: 150%;
   }
-  @media (min-width: 1024px) {
-  }
-  @media (max-width: 1024px) {
-    height: auto;
+  @media (max-width: 799px) {
     width: 30%;
+    height: 100%;
     & > span {
       font-size: 16px;
     }
@@ -93,17 +112,14 @@ const SwiperSlideWrapper = styled(SwiperSlide)`
   }
 `;
 
-const EventSwiper: FC<EventSwiperProps> = ({ activeIndex, events }) => {
+const EventSwiper: FC<EventSwiperProps> = ({
+  activeIndex,
+  events,
+  onResize,
+}) => {
   const swiperRef = useRef<SwiperRef | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const isMobile = useMediaQuery("(max-width: 1024px)");
-
-  useEffect(() => {
-    if (swiperRef.current) {
-      const swiperInstance = swiperRef.current.swiper;
-      swiperInstance.slideTo(0);
-    }
-  }, [activeIndex]);
+  const isMobile = useMediaQuery("(max-width: 799px)");
 
   const pagination = {
     clickable: true,
@@ -113,35 +129,43 @@ const EventSwiper: FC<EventSwiperProps> = ({ activeIndex, events }) => {
     prevEl: ".events-swiper-button-prev",
   };
   return (
-    <Container ref={containerRef} $isMobile={isMobile}>
-      <NavEL className="nav-element">
-      <NavIcon
-        size={40}
-        opposite={false}
-        className={"swiper-button events-swiper-button-prev"}
-        fill={"var(--brand-color-white)"}
-        circleColor={"var(--brand-color-white)"}
-      />
-    </NavEL>
+    <Container
+      ref={containerRef}
+      $isMobile={isMobile}
+      id="event-swiper-container"
+    >
+      {!isMobile && (
+        <NavEL className="nav-element">
+          <NavIcon
+            id="events"
+            size={40}
+            opposite={false}
+            className={"swiper-button events-swiper-button-prev"}
+            fill={"var(--brand-color-white)"}
+            circleColor={"var(--brand-color-white)"}
+          />
+        </NavEL>
+      )}
       {events && (
         <CustomSwiper
           ref={swiperRef}
-          spaceBetween={80}
-          slidesPerView={'auto'}
+          spaceBetween={0}
+          slidesPerView={"auto"}
           pagination={pagination}
           navigation={navigation}
+          observer={true}
+          onObserverUpdate={(swiper: SwiperClass) => swiper.setProgress(0)}
+          touchStartPreventDefault={true}
           modules={[Pagination, Navigation]}
+          onResize={onResize}
           breakpoints={{
-            320: {
-              spaceBetween: 25,
+            319: {
+              spaceBetween: 0,
             },
-            480: {
-              spaceBetween: 30,
+            799: {
+              spaceBetween: 0,
             },
-            756: {
-              spaceBetween: 30,
-            },
-            1200: {
+            1024: {
               spaceBetween: 80,
             },
           }}
@@ -152,6 +176,7 @@ const EventSwiper: FC<EventSwiperProps> = ({ activeIndex, events }) => {
                 key={
                   index + activeIndex + content + year + new Date().getUTCDate()
                 }
+                onClick={() => console.log("click slide", index)}
               >
                 <span>{year}</span> <p>{content}</p>
               </SwiperSlideWrapper>
@@ -159,15 +184,18 @@ const EventSwiper: FC<EventSwiperProps> = ({ activeIndex, events }) => {
           })}
         </CustomSwiper>
       )}
-      <NavEL className="nav-element">
+      {!isMobile && (
+        <NavEL className="nav-element">
           <NavIcon
+            id="events"
             size={40}
             opposite={true}
             className={"swiper-button events-swiper-button-next"}
             fill={"var(--brand-color-white)"}
             circleColor={"var(--brand-color-white)"}
           />
-      </NavEL>
+        </NavEL>
+      )}
     </Container>
   );
 };

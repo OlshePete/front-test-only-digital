@@ -11,10 +11,6 @@ export interface Event {
   content: string;
 }
 export interface Item {
-  width: number;
-  angle: number | null;
-  posX: number | null;
-  posY: number | null;
   label: string;
   events: Event[];
 }
@@ -25,6 +21,7 @@ export interface CircularItemProps {
   index: number;
   handleItemClick: (id: number,) => void;
   active: boolean;
+  label: string;
 }
 export interface ActiveIndex {
   index: number;
@@ -40,6 +37,7 @@ export interface NavIconProps {
   onClick?: () => void;
   className?: string;
   fill?: string;
+  id?: string;
 }
 export interface FCwithRefProps {
   ref: Ref<HTMLDivElement>
@@ -67,6 +65,7 @@ export interface ItemsSwiperProps {
 }
 export interface DateSummaryProps {
   dataset: Item[];
+  timeline: gsap.core.Timeline;
   activeIndex: number;
 }
 export interface TimelineProps {
@@ -76,6 +75,7 @@ export interface TimelineProps {
 export interface EventSwiperProps {
   events: Event[];
   activeIndex: number;
+  onResize: () => void;
 }
 export type YearSpanProp = {
   timeline: gsap.core.Timeline | null | undefined;

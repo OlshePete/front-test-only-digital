@@ -13,7 +13,7 @@ const Wrapper = styled.div<{
   margin: 0;
   margin-left: calc(((100vw - 1440px) / 3) * 2);
   margin-right: calc(((100vw - 1440px) / 3));
-  height: 100svh;
+  min-height: 100svh;
   max-width: 1440px;
   outline: 1px solid rgba(66, 86, 122, 0.2);
   display: flex;
@@ -39,15 +39,18 @@ const Wrapper = styled.div<{
     gap: 0;
   }
   @media (max-width: 1024px) {
+    padding: 0 20px;
+  }
+  @media (max-width: 799px) {
     height: calc(100svh - 40px);
     padding: 0 20px;
   }
 `;
 const App: React.FC = () => {
-  const isMobile = useMediaQuery("(max-width: 1024px)");
+  const isMobile = useMediaQuery("(max-width: 799px)");
 
   return (
-    <Wrapper $isMobile={isMobile}>
+    <Wrapper $isMobile={isMobile} >
       <CircularList dataset={dataset}/>
     </Wrapper>
   );

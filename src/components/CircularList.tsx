@@ -1,4 +1,4 @@
-import React, { FC, useRef, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -10,18 +10,20 @@ import useMediaQuery from "../hooks/useMediaQuery";
 
 import CircularItem from "./CircularItem";
 import DateSummary from "./summaries/DateSummary";
-import ItemsSwiper from "./swipers/ItemsSwiper";
 import { CircularListProps } from "types";
+import EventSwiper from "./swipers/EventSwiper";
+import ItemsNavigation from "./navigation/ItemsNavigation";
 
-const CircularList: FC<CircularListProps> = ({dataset}) => {
+const CircularList: FC<CircularListProps> = ({ dataset }) => {
   gsap.registerPlugin(MotionPathPlugin);
   const [activeIndex, setActiveIndex] = useState<number>(0);
+  const [isResize, setIsResize] = useState(false);
   const tracker = useRef<{ active: number }>({
     active: 0,
   });
   const wrapper = useRef<HTMLDivElement | null>(null);
 
-  const isMobile = useMediaQuery("(max-width: 1024px)");
+  const isMobile = useMediaQuery("(max-width: 799px)");
   const numItems = dataset.length;
   const itemStep = 1 / dataset.length;
 
@@ -30,15 +32,20 @@ const CircularList: FC<CircularListProps> = ({dataset}) => {
   const wrapProgress = gsap.utils.wrap(0, 1);
 
   const tl = useRef<gsap.core.Timeline | undefined>(undefined);
+  useEffect(() => {
+    gsap.to("#event-swiper-container", {
+      opacity: 1,
+      duration: 0.5,
+    });
+  }, [activeIndex]);
 
   useGSAP(
     () => {
-      if (isMobile) return;
       tl.current = gsap.timeline({
         paused: true,
         reversed: true,
       });
-
+      if (isMobile) return;
       if (wrapper.current && tl.current) {
         const itemsRaw: HTMLCollectionOf<HTMLDivElement> =
           wrapper.current.getElementsByClassName(
@@ -96,22 +103,60 @@ const CircularList: FC<CircularListProps> = ({dataset}) => {
       }
     },
     {
-      dependencies: [isMobile],
+      dependencies: [isMobile, isResize],
       scope: wrapper,
     }
   );
 
-  function moveWheel(amount: number) {
+  function moveWheel(amount: number, newIndex: number) {
+    const steps = Math.abs(amount / itemStep);
+
     if (tl.current) {
       const progress = tl.current.progress();
-
-      gsap.to(".item:not(.active)", {
-        scale: 0.1,
-        duration: 0.1,
-      });
-      gsap.to(".active", {
-        scale: 1,
-      });
+      gsap
+        .timeline({
+          defaults: {
+            duration: Math.max(steps * 0.4, 0.6),
+          },
+        })
+        .to(
+          ".item:not(.active)",
+          {
+            scale: 0.1,
+            duration: 0.1,
+          },
+          0
+        )
+        .to(
+          ".active",
+          {
+            scale: 1,
+          },
+          0
+        )
+        .to(
+          ".year-min",
+          {
+            textContent: Math.min(
+              ...dataset[newIndex].events.map((e) => e.year)
+            ),
+            snap: { textContent: 1 },
+            stagger: 1,
+            onComplete: () => {},
+          },
+          0
+        )
+        .to(
+          ".year-max",
+          {
+            textContent: Math.max(
+              ...dataset[newIndex].events.map((e) => e.year)
+            ),
+            snap: { textContent: 1 },
+            stagger: 1,
+          },
+          "<"
+        );
       gsap.to(tl.current, {
         progress: snap(progress + amount),
         modifiers: {
@@ -119,13 +164,31 @@ const CircularList: FC<CircularListProps> = ({dataset}) => {
             return wrapProgress(i);
           },
         },
+        duration: Math.max(steps * 0.4, 0.6),
+        ease: "ease.in",
+        onComplete: () => {
+          gsap.fromTo(
+            "#label",
+            {
+              opacity: 1,
+            },
+            {
+              opacity: 1,
+              duration: 1,
+            }
+          );
+        },
       });
+    } else {
     }
   }
 
-
   const handleClickItem = (newIndex: number) => {
-    setActiveIndex(newIndex);
+    gsap.to("#event-swiper-container", {
+      opacity: 0,
+      duration: 0.5,
+      onComplete: () => setActiveIndex(newIndex),
+    });
     if (wrapper.current?.children) {
       const children = wrapper.current.children;
       const items = gsap.utils.toArray(
@@ -145,23 +208,23 @@ const CircularList: FC<CircularListProps> = ({dataset}) => {
       const diff = prevIndex - newIndex;
       if (items) {
         if (Math.abs(diff) < numItems / 2) {
-          moveWheel(diff * itemStep);
+          moveWheel(diff * itemStep, newIndex);
         } else {
           var amt = numItems - Math.abs(diff);
 
           if (prevIndex > newIndex) {
-            moveWheel(amt * -itemStep);
+            moveWheel(amt * -itemStep, newIndex);
           } else {
-            moveWheel(amt * itemStep);
+            moveWheel(amt * itemStep, newIndex);
           }
         }
       }
-    }
+    } else moveWheel(itemStep * (activeIndex > newIndex ? -1 : 1), newIndex);
   };
 
   return (
-    <Container $isMobile={isMobile} id="test">
-      <MainHeader> Исторические <br /> даты </MainHeader>
+    <Container $isMobile={isMobile}>
+      <MainHeader>Исторические <br /> даты</MainHeader>
 
       {!isMobile && (
         <WrapperMain ref={wrapper} className="wrapper" key={"wrapper"}>
@@ -171,6 +234,7 @@ const CircularList: FC<CircularListProps> = ({dataset}) => {
                 handleItemClick={handleClickItem}
                 active={activeIndex === i}
                 key={label + i}
+                label={label}
                 index={i}
               />
             );
@@ -191,18 +255,25 @@ const CircularList: FC<CircularListProps> = ({dataset}) => {
           </svg>
         </WrapperMain>
       )}
-      <DateSummary dataset={dataset} activeIndex={activeIndex} />
-      <ItemsSwiper
+      <DateSummary
+        dataset={dataset}
         activeIndex={activeIndex}
-        items={dataset}
-        handleActiveChange={(i: number) => {
-          handleClickItem(i);
-        }}
-        onResize={() => {
-          console.log("resize");
-          //TODO update dot positions on resize
-        }}
+        timeline={tl.current || gsap.timeline()}
       />
+      <div id="events">
+        <ItemsNavigation
+          activeIndex={activeIndex}
+          handleSetActive={handleClickItem}
+          itemsLength={dataset.length}
+        />
+        <EventSwiper
+          activeIndex={activeIndex}
+          events={dataset[activeIndex].events.sort((a,b)=>a.year-b.year)}
+          onResize={() => {
+            setIsResize((p) => !p);
+          }}
+        />
+      </div>
     </Container>
   );
 };
@@ -229,28 +300,39 @@ const Container = styled.div<{
     opacity: 0.2;
     z-index: -11;
   }
+  @media (max-width: 1200px) and (min-width: 799px) and (max-height: 790px) {
+    justify-content: flex-start;
+    padding: 0px;
+    & > #events {
+      position: relative;
+      top: -120px;
+    }
+  }
   @media (max-width: 1200px) {
     display: flex;
-    padding: 40px 0;
+    padding: 40px 0 0 0;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
   }
-  @media (max-width: 768px) {
+  @media (max-width: 799px) {
     padding: 0;
     padding-top: 20px;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    outline: 1px dashed blue;
+    justify-content: flex-start;
+    & > #events {
+      flex-grow: 1;
+    }
   }
 `;
 const WrapperMain = styled.div`
   position: relative;
   min-height: 530px;
   max-height: 530px;
+  z-index: 3;
   & > svg {
     height: 530px;
     overflow: visible;
@@ -261,8 +343,9 @@ const WrapperMain = styled.div`
     left: 50%;
     transform: translate(-50%, -50%);
   }
-  @media (max-width: 1200px) and (min-width: 768px) and (max-height: 790px) {
-    transform: scale(0.6);
+  @media (max-width: 1440px) and (min-width: 799px) and (max-height: 790px) {
+    transform: scale(0.8);
+    height: auto;
   }
 `;
 
@@ -289,15 +372,15 @@ const MainHeader = styled.h1`
   @media (max-width: 1024px) {
     font-size: 32px;
     border: none;
-    padding-left: 0;
+    padding-left: 0px;
     margin-top: 60px;
   }
-  @media (max-width: 768px) {
+  @media (max-width: 799px) {
     padding-top: 0px;
     margin-top: 0px;
     position: relative;
     top: 0;
     left: 0;
     font-size: 20px;
-  } 
+  }
 `;

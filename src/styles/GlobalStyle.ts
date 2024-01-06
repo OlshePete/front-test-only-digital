@@ -18,6 +18,10 @@ export const GlobalStyle = createGlobalStyle`
 
   --swiper-navigation-sides-offset:0px;
   --swiper-navigation-top-offset: 50%;
+
+  --swiper-pagination-bullet-size: 6px;
+  --swiper-pagination-color: var(--brand-color-black-blue);
+  --swiper-pagination-top: calc(100% - 60px)
 } 
 body {
     margin: 0;
@@ -26,7 +30,7 @@ body {
     background-color:var(--brand-color-background);
     min-height:100vh;
   }
-#next-btn {
+#items-next-btn,#events-next-btn {
   &>path {
     transform:rotate(180deg)
   }

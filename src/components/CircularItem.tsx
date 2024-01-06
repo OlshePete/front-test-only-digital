@@ -7,6 +7,7 @@ const CircularItem: FC<CircularItemProps> = ({
   index,
   handleItemClick,
   active,
+  label,
 }) => {
   const ItemRef = useRef(null);
   const hoverRef = useRef<gsap.core.Timeline | null>(null);
@@ -35,15 +36,16 @@ const CircularItem: FC<CircularItemProps> = ({
         },
         "<"
       );
-  }, [ItemRef.current]);
+  }, [ItemRef.current, hoverRef.current]);
 
   return (
     <Block
       ref={ItemRef}
       onClick={(e) => {
-        hoverRef?.current?.pause();
+        hoverRef?.current?.clear();
         handleItemClick(index);
       }}
+      label={label}
       id="item"
       className={`item ${index + 1}  ${active ? "active" : ""}`}
       onMouseEnter={() => {
@@ -54,6 +56,7 @@ const CircularItem: FC<CircularItemProps> = ({
       }}
     >
       <span id="number">{index + 1}</span>
+      {active && <span id="label">{label}</span>}
     </Block>
   );
 };
@@ -62,6 +65,7 @@ export default CircularItem;
 
 const Block = styled.div<{
   ref?: React.RefObject<HTMLDivElement>;
+  label: string;
 }>`
   cursor: pointer;
   position: absolute;
@@ -73,7 +77,18 @@ const Block = styled.div<{
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
+
+  &.active > #label {
+    position: absolute;
+    top: calc((56px / 2) - 15px);
+    left: calc(100% + 20px);
+    color: var(--brand-color-black-blue);
+    font-family: "PT Sans";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 30px;
+  }
   &:not(.active) {
     transform: scale(0.1);
   }
