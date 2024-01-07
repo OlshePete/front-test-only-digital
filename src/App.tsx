@@ -38,9 +38,6 @@ const Wrapper = styled.div<{
   @media (max-width: 1200px) {
     gap: 0;
   }
-  @media (max-width: 1024px) {
-    padding: 0 20px;
-  }
   @media (max-width: 799px) {
     height: calc(100svh - 40px);
     padding: 0 20px;

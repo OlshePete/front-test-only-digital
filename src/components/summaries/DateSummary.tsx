@@ -15,6 +15,9 @@ const Container = styled.div`
   gap: 60px;
   justify-content: center;
   align-items: center;
+  @media (max-width: 1920px) and (min-width: 799px) and (max-height: 790px) {
+    top: calc(530px / 2 + 20px);
+  }
   @media (max-width: 799px) {
     position: relative;
     transform: none;

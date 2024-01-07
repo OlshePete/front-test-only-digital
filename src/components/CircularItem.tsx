@@ -68,6 +68,7 @@ const Block = styled.div<{
   label: string;
 }>`
   cursor: pointer;
+  z-index:3;
   position: absolute;
   width: 56px;
   height: 56px;

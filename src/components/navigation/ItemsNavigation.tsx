@@ -6,7 +6,9 @@ import { ItemsNavigationProps } from "../../types";
 import NavIcon from "../icons/NavIcon";
 
 const Container = styled.div`
+  position:relative;
   padding-left: 78px;
+  z-index:10;
   width: 120px;
   display: flex;
   flex-wrap: wrap;

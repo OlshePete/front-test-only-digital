@@ -39,13 +39,22 @@ const CircularList: FC<CircularListProps> = ({ dataset }) => {
     });
   }, [activeIndex]);
 
+  useEffect(() => {
+      if (isResize) {
+        tracker.current.active = 0
+        setActiveIndex(0)
+        setIsResize(false)
+      }
+  }, [isResize]);
+
   useGSAP(
     () => {
       tl.current = gsap.timeline({
         paused: true,
         reversed: true,
       });
-      if (isMobile) return;
+      if (isMobile || isResize) return;
+
       if (wrapper.current && tl.current) {
         const itemsRaw: HTMLCollectionOf<HTMLDivElement> =
           wrapper.current.getElementsByClassName(
@@ -270,7 +279,7 @@ const CircularList: FC<CircularListProps> = ({ dataset }) => {
           activeIndex={activeIndex}
           events={dataset[activeIndex].events.sort((a,b)=>a.year-b.year)}
           onResize={() => {
-            setIsResize((p) => !p);
+            setIsResize(true);
           }}
         />
       </div>
@@ -300,21 +309,27 @@ const Container = styled.div<{
     opacity: 0.2;
     z-index: -11;
   }
-  @media (max-width: 1200px) and (min-width: 799px) and (max-height: 790px) {
+  @media (max-width: 1920px) and (min-width: 799px) and (max-height: 790px) {
     justify-content: flex-start;
-    padding: 0px;
+    padding: 20px 0 0 0;
     & > #events {
       position: relative;
-      top: -120px;
+      top: -15svh;
+    }
+    &::after {
+      top:calc(530px / 2 + 20px );
     }
   }
   @media (max-width: 1200px) {
     display: flex;
-    padding: 40px 0 0 0;
+    padding: 40px 20px 0 20px;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    &::after{
+      top:calc(530px / 2 + 40px );
+    }
   }
   @media (max-width: 799px) {
     padding: 0;
@@ -372,11 +387,12 @@ const MainHeader = styled.h1`
   @media (max-width: 1024px) {
     font-size: 32px;
     border: none;
-    padding-left: 0px;
+    padding-left: 20px;
     margin-top: 60px;
   }
   @media (max-width: 799px) {
     padding-top: 0px;
+    padding-left: 0px;
     margin-top: 0px;
     position: relative;
     top: 0;
