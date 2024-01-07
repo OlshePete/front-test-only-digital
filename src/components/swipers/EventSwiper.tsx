@@ -48,6 +48,9 @@ const Container = styled.div<{
   & > .nav-element {
     padding: 0 20px;
   }
+  & > .swiper-wrapper {
+    z-index:4;
+  }
   .swiper-button.swiper-button-disabled {
     opacity: 0;
   }
@@ -83,6 +86,7 @@ const SwiperSlideWrapper = styled(SwiperSlide)`
   height: 135px;
   width: 400px;
   padding-right: 25px;
+  z-index:4;
   & > span {
     color: var(--brand-color-blue);
     font-family: var(--brand-font-secondary);

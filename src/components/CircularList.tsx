@@ -347,7 +347,6 @@ const WrapperMain = styled.div`
   position: relative;
   min-height: 530px;
   max-height: 530px;
-  z-index: 3;
   & > svg {
     height: 530px;
     overflow: visible;
