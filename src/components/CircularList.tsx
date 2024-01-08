@@ -62,7 +62,7 @@ const CircularList: FC<CircularListProps> = ({ dataset }) => {
           ) as HTMLCollectionOf<HTMLDivElement>;
         const items: gsap.core.Tween[] = gsap.utils.toArray(itemsRaw);
         const path = MotionPathPlugin.convertToPath("#holder", false)[0];
-
+        const coefficient = numItems===2?0.1:0.05  
         if (items && dataset.length > 0) {
           items.forEach((item, i, { length }) => {
             gsap.set(item as gsap.core.Tween, {
@@ -71,7 +71,7 @@ const CircularList: FC<CircularListProps> = ({ dataset }) => {
                 path: path,
                 align: path,
                 alignOrigin: [0.5, 0.5],
-                end: i / length - itemStep,
+                end: (i / length - itemStep)+(coefficient*(6-length)),
               },
             });
           });
@@ -269,7 +269,6 @@ const CircularList: FC<CircularListProps> = ({ dataset }) => {
         activeIndex={activeIndex}
         timeline={tl.current || gsap.timeline()}
       />
-      <div id="events">
         <ItemsNavigation
           activeIndex={activeIndex}
           handleSetActive={handleClickItem}
@@ -282,7 +281,6 @@ const CircularList: FC<CircularListProps> = ({ dataset }) => {
             setIsResize(true);
           }}
         />
-      </div>
     </Container>
   );
 };
@@ -312,7 +310,7 @@ const Container = styled.div<{
   @media (max-width: 1920px) and (min-width: 799px) and (max-height: 790px) {
     justify-content: flex-start;
     padding: 20px 0 0 0;
-    & > #events {
+    & > #items-navigation-wrapper, & > #event-swiper-container {
       position: relative;
       top: -15svh;
     }
@@ -347,6 +345,9 @@ const WrapperMain = styled.div`
   position: relative;
   min-height: 530px;
   max-height: 530px;
+  & > div {
+    z-index:4
+  }
   & > svg {
     height: 530px;
     overflow: visible;

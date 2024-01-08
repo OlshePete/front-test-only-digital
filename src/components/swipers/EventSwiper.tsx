@@ -48,7 +48,7 @@ const Container = styled.div<{
   & > .nav-element {
     padding: 0 20px;
   }
-  & > .swiper-wrapper {
+  & > .swiper {
     z-index:4;
   }
   .swiper-button.swiper-button-disabled {

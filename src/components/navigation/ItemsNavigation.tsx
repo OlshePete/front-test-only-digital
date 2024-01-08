@@ -42,7 +42,7 @@ const ItemsNavigation: FC<ItemsNavigationProps> = ({
   handleSetActive,
 }) => {
   return (
-    <Container>
+    <Container id="items-navigation-wrapper">
       <ActiveItemSummary>
         {`${activeIndex + 1}`.padStart(2, "0")}/
         {`${itemsLength}`.padStart(2, "0")}
