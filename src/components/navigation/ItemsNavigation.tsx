@@ -20,7 +20,7 @@ const Container = styled.div`
     position:absolute;
     top:calc(100% - 70px);
     width: 60px;
-    z-index:3;
+    z-index:10;
     row-gap:10px;
     column-gap:8px;
     padding-left: 0px;

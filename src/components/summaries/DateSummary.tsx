@@ -19,6 +19,7 @@ const Container = styled.div`
     top: calc(530px / 2 + 20px);
   }
   @media (max-width: 799px) {
+    height:50svh;
     position: relative;
     transform: none;
     top: 0;

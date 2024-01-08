@@ -336,7 +336,7 @@ const Container = styled.div<{
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    & > #events {
+    & > #event-swiper-container {
       flex-grow: 1;
     }
   }
